@@ -1,0 +1,418 @@
+<head>
+<title>BBCode Playground</title>
+<style>
+div {
+    display: block;
+}
+textarea {
+    border: 2px solid black;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding: 5px;
+    width: 100%;
+}
+div {
+	display: block;
+}
+pre {
+    display: block;
+    font-family: monospace;
+    margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    text-align: left;
+    width: 1060px;
+}
+iframe[Attributes Style] {
+    width: 425px;
+    height: 355px;
+    border-top-width: 0px;
+    border-right-width: 0px;
+    border-bottom-width: 0px;
+    border-left-width: 0px;
+}
+.quotetext {
+    background-color: #fff;
+    border: 1px solid #ebebeb;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    margin-top: 5px;
+    padding: 5px;
+}
+.img-a-l {
+	float: left;
+	padding-left: 8px;
+	padding-top: 4px;
+}
+.img-a-r {
+	float: right;
+	padding-left: 8px;
+	padding-top: 4px;
+}
+.codetext pre{
+	background-color: #fff;
+    border: 1px solid #ebebeb;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    margin-top: 5px;
+    padding: 5px;
+}
+.userimg {
+	max-width: 100%;
+}
+#result {
+    margin-top: 10px;
+    max-width: 800px;
+}
+</style>
+</head>
+<body>
+    <h3>BBCODE PLAYGROUND</h3>
+    <div>
+    <small style="text-align: right;">BBCode</small>
+    <!--<textarea onkeyup="autoUpdate();" style="width: 100%;" id="code" rows="8" cols="100">We have a [url=https://www.google.com]link[/url] here.</textarea>
+    -->
+    <textarea onkeyup="autoUpdate();" style="width: 100%;" id="code" rows="8" cols="100">[b]bold[/b] and [b]bold[/b].</textarea>
+    <button id="process" onclick="updateResult();">Process</button>
+    <button onclick="showdiv('gradientdiv'); getGradient();">Show Gradient</button>
+    <button onclick="showdiv('htmldiv');">Show HTML</button>
+    <button id="clear" onclick="document.getElementById('code').value = '';">Clear</button>
+    <br>
+    <div id="htmldiv" style="display: none;">
+        <small style="text-align: right;">HTML</small>
+        <textarea id="htmlcode" style="width: 100%;" rows="8" cols="100"></textarea>
+    </div>
+    <div id="gradientdiv" style="display: none;">
+        <small style="text-align: right;">Gradient</small>
+        <textarea id="gradientcode" onkeyup="getGradient();" style="width: 100%;" rows="8" cols="100">Roses are red and violets are blue.</textarea>
+        <textarea id="gradientcoderesult" style="width: 100%;" rows="2" cols="100"></textarea>
+        <input type="color" id="colorpicker1" onchange="getGradient();" value="#ff0000">
+        <input type="color" id="colorpicker2" onchange="getGradient();" value="#0000ff">
+    </div>
+    <div id="result" style="width: 100%; border: 1px solid black;">Result goes here!</div>
+    </div>
+    <script>
+    	var code = document.getElementById("code");
+    	var htmldiv = document.getElementById("htmldiv");
+    	var result = document.getElementById("result");
+
+            function hex2dec(hex) {
+                var n = {"0":0,"1":1,"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"a":10,"b":11,"c":12,"d":13,"e":14,"f":15};
+                var result = 0;
+                for (var i=0; i < hex.length; i++) {
+                    result = result * 16;
+                    result = result + n[hex[i].toLowerCase()];
+                }
+               return result;
+            }
+            function rgb2hexcolor(rgb) {
+                function pad(s) {
+                    if (s.length < 2) {return "0" + s;} else {return s;}
+                }
+                return "#" + pad(rgb.red.toString(16)) + pad(rgb.green.toString(16)) +pad(rgb.blue.toString(16));
+            }
+            function hexcolor2rgb(hexcolor) {
+                var red = hex2dec(hexcolor.slice(1,3));
+                var green = hex2dec(hexcolor.slice(3,5));
+                var blue = hex2dec(hexcolor.slice(5,7));
+                return {"red":red, "green":green, "blue":blue};
+            }
+        function getGradient() {
+            var cp1 = document.getElementById("colorpicker1");
+            var cp2 = document.getElementById("colorpicker2");
+            var gcode = document.getElementById("gradientcode");
+            var gcoderesult = document.getElementById("gradientcoderesult");
+            var result = document.getElementById("result");
+            var text = "";
+            for (var i=0; i < gcode.value.length; i++) {
+                var c1 = hexcolor2rgb(cp1.value);
+                var c2 = hexcolor2rgb(cp2.value);
+                var r = Math.floor((((c2.red-c1.red)/gcode.value.length)*i))+c1.red;
+                var g = Math.floor((((c2.green-c1.green)/gcode.value.length)*i))+c1.green;
+                var b = Math.floor((((c2.blue-c1.blue)/gcode.value.length)*i))+c1.blue;
+                var color = rgb2hexcolor({"red":r, "green":g, "blue":b}); 
+                text = text + "[color=\"" + color + "\"]" + gcode.value[i] + "[/color]";
+            }
+            gcoderesult.value = text;
+            result.innerHTML = convertCode(text);
+        }
+        function showdiv(div) {
+            var divelem = document.getElementById(div);
+            if (divelem.style.display == "inline-block") {divelem.style.display = "none";
+            } else {divelem.style.display = "inline-block";}
+        }
+        function getCode() {
+            return document.getElementById("code").value;
+        }
+        function updateResult() {
+            var code = getCode();
+            var bbcode = getBBCode(code);
+            document.getElementById("result").innerHTML = bbcode;
+        }
+        function updateHTML() {
+            document.getElementById("htmlcode").value = document.getElementById("result").innerHTML;
+        }
+        function autoUpdate() {
+            updateResult();
+            updateHTML();
+        }
+        
+
+       autoUpdate();
+
+function replaceAll(str, r1, r2) {
+	while (str.indexOf(r1) !== -1) {
+		str = str.replace(r1, r2);
+	}
+	return str;
+}
+function getSelectedText() {
+	var c = document.getElementById("code");
+	var start = c.selectionStart;
+	var end = c.selectionEnd;
+	return {"start":start, "end":end};
+}
+
+
+function convert2HTML(command, value, params, content) {
+    var result = ""
+    if (command=='b') {
+        result = "<b>" + content + "</b>";
+    } else if (command=='center') {
+        result = "<div style=\"text-align: center;\">" + content + "</div>";
+    } else if (command=='code') {
+        result = "<div class=\"codetext\"><pre>" + content + "</pre></div>"
+    } else if (command=='color') {
+        result = "<span style=\"color: " + value + "\">" + content + "</span>";
+    } else if (command=='i') {
+        result = "<i>" + content + "</i>";
+    } else if (command=='img') {
+    	var alignment = ""
+    	if (params !== undefined && params.align=="left") {
+    		alignment = " img-a-l";
+    	} else if (params !== undefined && params.align=="right") {
+    		alignment = " img-a-r";
+    	}
+        result = "<img class=\"userimg" + alignment + "\" src=\"" + content + "\">";
+    } else if (command=='list') {
+    	var list = "";
+    	var leading_content = content.indexOf('[*]');
+    	if (leading_content !== -1) {
+    		list = list + content.substring(0,leading_content);
+    		var remaining_content = content.substring(leading_content);
+    		while (remaining_content.indexOf('[*]') !== -1) {
+    			var end = remaining_content.substring(3).indexOf('[*]');
+    			if (end==-1) {end=remaining_content.length;}
+    			var item = remaining_content.substring(3, end+3);
+    			list += "<li>" + item + "</li>";
+    			remaining_content = remaining_content.substring(end+3);
+    		}
+    	} else {
+    		list = content;
+    	}
+    	if (value=="1") {result = "<ol>" + list + "</ol>";} else {result = "<ul>" + list + "</ul>";}
+    } else if (command=='quote') {
+        var autor_part = "";
+        if (value !== null && value !== "" && value[0] !== " ") {
+            if (value.indexOf(" ") !== -1) {
+                autor = value.substring(0, value.indexOf(" "));
+            } else {
+                autor = value;
+            }
+            autor_part = "<strong>" + autor + " said:</strong><br>"
+        }
+        result = "<div class=\"quotetext\">" + autor_part + content + "</div>";
+    } else if (command=='right') {
+        result = "<div style=\"text-align: right;\">" + content + "</div>";
+    } else if (command=='s') {
+        result = "<del>" + content + "</del>";
+    } else if (command=='size') {
+    	if (value===null || value === "") {
+    		return -1;
+    	}
+        result = "<span style=\"font-size: " + value + "%;\">" + content + "</span>";
+    } else if (command=='spoiler') {
+        if (value==null) {value="spoiler";}
+        result = "<div class=\"spoiler\"><input type=\"button\" onclick=\"this.nextElementSibling.style.display='inline-block';this.style.display='none';\" value=\"Show " + value + "\"><span style=\"display: none;\"><input type=\"button\" onclick=\"this.parentElement.previousElementSibling.style.display='inline-block';this.parentElement.style.display='none';\" value=\"Hide " + value + "\"><br>" + content + "</span></div>"
+    } else if (command=='u') {
+        result = "<u>" + content + "</u>";
+    } else if (command=='url') {
+    	if (value==null || value=="") {
+    		return -1;
+    	}
+        result = "<a href=\"" + value + "\" rel=\"nofollow\" target=\"_blank\">" + content + "</a>";
+    } else if (command=='yt') {
+        result = "<iframe class=\"movie youtube\" width=\"425\" height=\"355\" frameborder=\"0\" src=\"https://youtube.com/embed/" + content + "?rel=1\"></iframe>"
+    } else {
+        return -1;
+    }
+    return result;
+}
+
+
+function getTags(code) {
+	var opbracket1=opbracket2=edbracket1=edbracket2=tag=value=command=content=null;
+	var params={};
+	opbracket1 = code.indexOf('[');
+
+	opbracket2 = opbracket1 + code.substring(opbracket1).indexOf(']');
+	tag = code.substring(opbracket1+1,opbracket2);
+	command = tag.toLowerCase();
+	// Get value
+	var equalsignpos = tag.indexOf('=');
+	if (equalsignpos !== -1 && tag.substring(0, equalsignpos).indexOf(' ') == -1) {
+		command = tag.substring(0, equalsignpos).toLowerCase();
+		value = tag.substring(equalsignpos+1);
+		value = replaceAll(value, '"', '');
+	}
+	// Get params
+	var spacesignpos = tag.indexOf(' ');
+	if (spacesignpos !== -1 && tag.substring(0, spacesignpos).indexOf('=') == -1) {
+		command = tag.substring(0, spacesignpos).toLowerCase();
+		equalsignpos = tag.indexOf('=');
+		if (equalsignpos !== -1) {
+			params[tag.substring(spacesignpos+1,equalsignpos)] = tag.substring(equalsignpos+1);
+		}
+	}
+	//Get ending tag
+	edbracket1 = code.substring(opbracket2+1).toLowerCase().indexOf('[/' + command + ']');
+	if (edbracket1 !== -1) {
+		edbracket1 = edbracket1 + opbracket2+1;
+		edbracket2 = edbracket1 + ('/' + command + ']').length;
+		content = code.substring(opbracket2+1, edbracket1);
+	}
+	return {"op1":opbracket1, "op2":opbracket2, "ed1":edbracket1, "ed2":edbracket2, "command":command, "tag":tag, "value":value, "params":params, "content":content};
+
+}
+function getJson(code) {
+    function appendTags(array, subcode) {
+        // Finds tags in a subcode and append into existing array
+        if (hasValidTags(subcode)) {
+            subcode = getJson(subcode);
+            for (var i=0; i<subcode.length; i++) {
+                array.push(subcode[i]);
+            }
+        } else {
+            if (subcode !== "") {array.push(subcode);}
+        }
+        return array;
+    }
+    var dict = [];
+    var tags = getTags(code);
+    var subcode = code.substring(tags.op2+1, tags.ed1).indexOf('['+tags.command);
+    var subtags = null;
+    if (subcode !== -1) {subcode = subcode + tags.op2+1; subtags=getTags(code.substring(subcode));}
+    // If there are inner command opening tags, process those
+    if (tags.content !== null && subtags !== null && subtags.content !== null) {
+        var text1 = code.substring(0, subcode);
+        if (text1 !== "") {dict.push(text1);}
+        dict = appendTags(dict, code.substring(subcode));
+        // code = code.substring(0, subcode) + getJson(code.substring(subcode));
+        /*
+        subtags = getTags(code);
+        if (subtags.content !== null) {
+            code = getJson(code);
+        }
+        */
+    } else if (tags.content !== null) {
+        result = convert2HTML(tags.command, tags.value, tags.params, tags.content);
+        if (result !== -1) {
+            if (tags.command !== "code") {
+                result = getJson(result);
+            }
+            var tag = {};
+            var text1 = code.substring(0, tags.op1);
+            if (text1 !== "") {dict.push(text1);}
+            tag.command = tags.command;
+            tag.value = tags.value;
+            tag.params = tags.params;
+            if (command !== "code") {
+                tag.content = getJson(tags.content);
+            }  else {
+                tag.content = [tags.content];
+            }
+            dict.push(tag);
+            dict = appendTags(dict, code.substring(tags.ed2+1));
+            //code = code.substring(0, tags.op1) + result + getJson(code.substring(tags.ed2+1));
+        } else {
+            // Command is not in commands
+            var text1 = code.substring(0, tags.op2+1);
+            if (text1 !== "") {dict.push(text1);}
+            dict = appendTags(dict, tags.content);
+            var text3 = code.substring(tags.ed1, tags.ed2+1);
+            if (text3 !== "") {dict.push(text3);}
+            dict = appendTags(dict, code.substring(tags.ed2+1));
+            //code = code.substring(0, tags.op2+1) + getJson(tags.content) + code.substring(tags.ed1, tags.ed2+1) + getJson(code.substring(tags.ed2+1));
+        }
+    // First tag failed. Try remaining code
+    } else if (tags.op1 !== null) {
+        if (tags.op1 !== null && tags.op1 !== -1) {
+            var nextop1 = code.substring(tags.op1+1).indexOf('[');
+            if (nextop1 !== -1) {
+                nextop1 = nextop1 + tags.op1+1;
+                var text1 = code.substring(0, nextop1);
+                if (text1 !== "") {dict.push(text1);}
+                dict = appendTags(dict, code.substring(nextop1));
+                //code = code.substring(0, nextop1) + getJson(code.substring(nextop1));
+           } else {
+                if (code !== "") {dict.push(code);}
+            }
+        } else {
+            if (code !== "") {dict.push(code);}
+        }
+    } else {
+        dict.push(code);
+    }
+    return dict;
+}
+function convertCode(code) { 
+	var tags = getTags(code);
+	var subcode = code.substring(tags.op2+1, tags.ed1).indexOf('['+tags.command);
+	var subtags = null;
+	if (subcode !== -1) {subcode = subcode + tags.op2+1; subtags=getTags(code.substring(subcode));}
+	// If there are inner command opening tags, process those
+	if (tags.content !== null && subtags !== null && subtags.content !== null) {
+		code = code.substring(0, subcode) + convertCode(code.substring(subcode));
+		subtags = getTags(code);
+		if (subtags.content !== null) {
+			code = convertCode(code);
+		}
+	} else if (tags.content !== null) {
+		result = convert2HTML(tags.command, tags.value, tags.params, tags.content);
+		if (result !== -1) {
+            if (tags.command !== "code") {
+                result = convertCode(result);
+            }
+			code = code.substring(0, tags.op1) + result + convertCode(code.substring(tags.ed2+1));
+		} else {
+            // Command is not in commands
+            code = code.substring(0, tags.op2+1) + convertCode(tags.content) + code.substring(tags.ed1, tags.ed2+1) + convertCode(code.substring(tags.ed2+1));
+        }
+    // First tag failed. Try remaining code
+	} else {
+        if (tags.op1 !== null && tags.op1 !== -1) {
+           var nextop1 = code.substring(tags.op1+1).indexOf('[');
+           if (nextop1 !== -1) {
+                nextop1 = nextop1 + tags.op1+1;
+                code = code.substring(0, nextop1) + convertCode(code.substring(nextop1));
+           }
+        }
+	}
+	return code;
+}
+function hasValidTags(code) {
+    var tags = getTags(code);
+    if (tags.content !== null) {return true;} else {return false;}
+}
+
+function getBBCode(code) {
+    code = replaceAll(code, '<', '&lt;');
+    code = replaceAll(code, '>', '&gt;');
+    code = code.replace(/\n/g, "<br>");
+    code = convertCode(code);
+    return code;
+}
+// Code made by _NaLi
+    </script>
+</body>
